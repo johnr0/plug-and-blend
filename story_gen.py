@@ -40,11 +40,21 @@ Character: Kelly, grandmother
 Start: Kelly found her grandmother's pizza recipe in a shoebox of memories. Kelly reminisced about how much she loved her grandmother's pizza. Kelly decided that she was going to try to make pizza.
 Story after start,: Kelly studied the recipe and gathered everything she needed. Kelly successfully made a pizza from her grandmother's recipe.
 ###
+Character: Leo
+Start: Leo wore a toupee and was anxious about it. Leo decided to go out for a short walk.
+Story after start: It was a very windy day, but he wasn't too concerned. Suddenly, a strong wind came through and took his toupee! His dog leaped and caught it, and he quickly ran home.
+###
+Character: Jimmy
+Start: Jimmy was a master with his grill. He spent every weekend getting better with his grill. One day he was offered a TV show about grilling on a local channel, Jimmy accepted the job in an instant.
+Story after start: He quit his day job and spent all his time grilling.
+###
 Character: Mel, Linda
 Start: Mel had a friend, Linda, that Mel didn't know well. Mel let her over my house.
 Story after start: Linda paid rent then asked for some of it back. Linda drinks my juice and eats my food. Linda also makes a huge mess and is very sloppy. Linda got kicked out in two weeks by Mel.
 ###
-Character: """
+Character: Matthew
+Start: Matthew grew up with a dad that pushed him in sports. He thought he would grow up to be an athlete.
+Story after start: """
     dummy_character = "Matthew"
     dummy_start = "Matthew grew up with a dad that pushed him in sports. He thought he would grow up to be an athlete."
 
@@ -193,7 +203,7 @@ Character: """
 
         # John: assign the last sentence only... 
         all_sentences = [self.dummy_start]
-        last_sentence = self.dummy_sentence + self.dummy_character + '\nStart: '+ all_sentences[0] +'\nStory after start:'
+        last_sentence = self.dummy_start
         
 
         # for progress bar interfacing
@@ -218,6 +228,7 @@ Character: """
                 context = self.dummy_sentence + self.dummy_character + '\nStart: '+ context +'\nStory after start:'
 
             if not self.no_regenration_mask[index]:
+                print(context)
                 # John: generate_one_sentence is the most important in terms of understanding how it is controlled
                 sentence = self.gedi_skill_obj.generate_one_sentence(sentence=context,topic=idx)
                 if len(sentence) < 1:
@@ -283,7 +294,7 @@ def run_demo(topics = None,base_language_model_path = None, gedi_path = None):
         summary_type_names=topics_available,
         gen_length=10,
         gaussian_var=1,
-        generation_extra_horizon=1,
+        generation_extra_horizon=5,
         weight_mode=None,
        )
     while agent.do_next_action():

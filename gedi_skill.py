@@ -80,6 +80,7 @@ class GediSkill:
         self.model = self.model.to(self.device)
         self.model = self.model.float()
 
+        # John: Below, embed gedi model... from gedi path
         gedi_model_name_or_path = gedi_model_path
         self.gedi_model = self.model_class.from_pretrained(gedi_model_name_or_path)
         self.gedi_model.to(self.device)
@@ -159,8 +160,11 @@ class GediSkill:
         secondary_code = topic
 
         disc_weight = self.disc_weight
+        gpt3_api_key = None
         if type(extra_args) is dict and 'disc_weight' in extra_args:
             disc_weight = extra_args['disc_weight']
+        if type(extra_args) is dict and 'gpt3_api_key' in extra_args:
+            gpt3_api_key = extra_args['gpt3_api_key']
 
         if sentence == "":
             print("Prompt is empty! Using a dummy sentence.")
@@ -215,6 +219,7 @@ class GediSkill:
                                                  code_0=self.code_undesired,
                                                  code_1=self.code_desired,
                                                  multi_code=multi_code,
+                                                 gpt3_api_key = gpt3_api_key, 
                                                  )
 
         if type(extra_args) is dict and 'get_gen_token_count' in extra_args:
