@@ -192,8 +192,9 @@ Character: """
         print("Planner output: %s" % skills_to_use)
 
         # John: assign the last sentence only... 
-        last_sentence = self.dummy_sentence
-        all_sentences = []
+        all_sentences = [self.dummy_start]
+        last_sentence = self.dummy_sentence + self.dummy_character + '\nStart: '+ all_sentences[0] +'\nStory after start:'
+        
 
         # for progress bar interfacing
         import tqdm
