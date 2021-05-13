@@ -3,7 +3,9 @@ from scipy.stats import norm
 # Specify which LM interface is used.
 from gedi_skill import GediSkill
 
-class Feedback:
+# John: In this... summary == topic
+
+class Feedback: # John: What is this?
     def __init__(self,opcode,content):
         self.opcode = opcode
         self.content = content
@@ -32,7 +34,19 @@ class GeDiStoryAgent():
 
     # A sentence as context when there are not,
     # or when the generator can't generate anything (due to a natural finish in input hinting topic changes).
-    dummy_sentence = "Recently, "
+    # John: Below is the initial sentence...
+    dummy_sentence = """###
+Character: Kelly, grandmother
+Start: Kelly found her grandmother's pizza recipe in a shoebox of memories. Kelly reminisced about how much she loved her grandmother's pizza. Kelly decided that she was going to try to make pizza.
+Story after start,: Kelly studied the recipe and gathered everything she needed. Kelly successfully made a pizza from her grandmother's recipe.
+###
+Character: Mel, Linda
+Start: Mel had a friend, Linda, that Mel didn't know well. Mel let her over my house.
+Story after start: Linda paid rent then asked for some of it back. Linda drinks my juice and eats my food. Linda also makes a huge mess and is very sloppy. Linda got kicked out in two weeks by Mel.
+###
+Character: """
+    dummy_character = "Matthew"
+    dummy_start = "Matthew grew up with a dad that pushed him in sports. He thought he would grow up to be an athlete."
 
     def __init__(
             self,
@@ -42,7 +56,7 @@ class GeDiStoryAgent():
             gaussian_var=2,
             weight_mode=None,
             summary_type_names=None,
-            generation_extra_horizon=1,
+            generation_extra_horizon=5,
     ):
         """
         Create an agent interface for generating stories.
@@ -103,6 +117,7 @@ class GeDiStoryAgent():
         else:
             raise RuntimeError
 
+    # John: this function runs the generation pipeline, as a whole
     def do_next_action(self):
         if self.next_action == directagent_request_summary:
             self.request_info(Feedback(directagent_request_summary, None))
@@ -145,6 +160,7 @@ class GeDiStoryAgent():
     def generate(self, mode="blend"):
         print("Now generating...")
         # print(self.summary)
+        # John: get topic weights for each sentence
         if mode == "naive":
             skills_to_use = []
             skills_to_use_raw = np.argmax(self.summary, axis=1)
@@ -174,13 +190,18 @@ class GeDiStoryAgent():
         else:
             raise NotImplementedError("generation mode %s not supported: %s" % mode)
         print("Planner output: %s" % skills_to_use)
+
+        # John: assign the last sentence only... 
         last_sentence = self.dummy_sentence
         all_sentences = []
+
+        # for progress bar interfacing
         import tqdm
         index = -1
         for idx in tqdm.tqdm(skills_to_use):
             index += 1
             context = last_sentence
+            # John: Below is for appending horizon text... for our case, we would want to append "prompt" for necessary and for generated context, we would use "some of contexts" that are generated recently.
             if self.generation_extra_horizon > 0:
                 skip_first = True  # to skip the prompt already attached
                 sentence_attached = 0
@@ -193,13 +214,19 @@ class GeDiStoryAgent():
                     if sentence_attached >= self.generation_extra_horizon:
                         #print("Attached %s additional sentence as context." % sentence_attached)
                         break
+                context = self.dummy_sentence + self.dummy_character + '\nStart: '+ context +'\nStory after start:'
+
             if not self.no_regenration_mask[index]:
+                # John: generate_one_sentence is the most important in terms of understanding how it is controlled
                 sentence = self.gedi_skill_obj.generate_one_sentence(sentence=context,topic=idx)
                 if len(sentence) < 1:
+                    # John: maybe I need to "rerun" generation or just quit...
+                    # context = self.dummy_sentence + self.dummy_character + '\nStart: '+ context +'\nStory after start:'
                     # No sentence generated, assuming force of change of topics
-                    sentence = self.gedi_skill_obj.generate_one_sentence(sentence=self.dummy_sentence, topic=idx)
+                    sentence = self.gedi_skill_obj.generate_one_sentence(sentence=context, topic=idx)
                 all_sentences.append(sentence)
             else:
+                # John: below is for forced sentences defined by the user....
                 output = self.generated_sentences[index]
                 sentence = output
                 all_sentences.append(sentence)
@@ -234,6 +261,7 @@ def run_demo(topics = None,base_language_model_path = None, gedi_path = None):
     else:
         topics_available = topics
 
+    # John: It might need to change to GPT-3.... let's think about it
     if base_language_model_path is None:
         try:
             base_language_model_path = base_LM_path

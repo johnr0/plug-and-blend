@@ -178,7 +178,9 @@ class GediSkill:
         encoded_prompts = torch.LongTensor(text_ids).unsqueeze(0).to(self.device)
 
         if type(topic) is str:
+            # John: sole topic --> 100% weight?
             multi_code = self.tokenizer.encode(secondary_code)
+            
         elif type(topic) is dict:
             multi_code = {}
             for item in secondary_code:
@@ -187,9 +189,11 @@ class GediSkill:
         else:
             raise NotImplementedError("topic data type of %s not supported... Supported: (str,dict)" % type(topic))
 
+
         # If 1, generate sentences towards a specific topic.
         self.attr_class = 1
 
+        #GPT 2 running+CC-LM
         generated_sequence = self.model.generate(input_ids=encoded_prompts,
                                                  pad_lens=None,
                                                  max_length=self.length + length_of_prompt_in_tokens,

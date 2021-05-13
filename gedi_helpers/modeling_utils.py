@@ -905,7 +905,7 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin):
 
     def _generate_no_beam_search(
             self,
-            input_ids,
+            input_ids, # serve as the prompt
             pad_lens,
             cur_len,
             max_length,
@@ -1040,6 +1040,9 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin):
             prompt_length = torch.sum(masks,dim=-1)
             if not (pad_lens is None):
                 model_inputs["pad_lens"] = pad_lens
+
+
+            # John: To get gpt3/gpt2 logits.... 
             if not (gpt3_api_key is None):
                 #todo: allow masks to be set for gpt3 logits. I can't test this yet.
                 next_token_logits = self.get_gpt3_logits(model_inputs["input_ids"],
@@ -1063,6 +1066,8 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin):
                 #print("Raw prob for token 100 sentence 0: %s@@"%next_token_logits[0][100])
             if get_ll:
                 next_token_logp = torch.log_softmax(next_token_logits, -1)
+
+            # John: To get gedi-related?
             if not (gedi_model is None):
                 # want to compute LM loss here so feeding inputs as labels
                 if not gedi_past is None:
