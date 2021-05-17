@@ -871,15 +871,16 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin):
         # import ipdb; ipdb.set_trace()
         return output
 
-    def get_gpt3_logits(self, input_ids, tokenizer, non_gpt3_logp=-50000.00, api_key=None):
+    def get_gpt3_logits(self, input_ids, tokenizer, non_gpt3_logp=-50000.00, api_key=None, temperature=0.7):
 
         import openai
         openai.api_key = api_key
         completion = openai.Completion()
         prompt = tokenizer.decode(input_ids[0])
         response = completion.create(prompt=prompt,
-                                     engine="davinci",
+                                     engine="curie",
                                      max_tokens=1,
+                                     temperature=temperature, 
                                      logprobs=100)
 
         response_dict = response["choices"][0]["logprobs"]["top_logprobs"][0]
